@@ -5,11 +5,8 @@ from ..client.errors import RESTAPIError
 import sys
 
 class CLI(object):
-    def __init__(self, debug=False, api_url=None):
-        args = {}
-        if api_url:
-            args['base_url'] = api_url
-        self.client = RESTClient(**args)
+    def __init__(self, debug=False, endpoint=None):
+        self.client = RESTClient(endpoint=endpoint)
         self.debug = debug
         self.error_handlers = {
             401: self.error_authen,

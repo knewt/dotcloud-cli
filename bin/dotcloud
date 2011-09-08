@@ -7,5 +7,7 @@ except ImportError, e:
    from dotcloud.cmdline import CLI
 
 if __name__ == '__main__':
-   cli = CLI()
+   import os
+   url = os.environ.get('DOTCLOUD_API_ENDPOINT', 'https://ws.dotcloud.com/1.0')
+   cli = CLI(endpoint=url)
    cli.run()

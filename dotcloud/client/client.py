@@ -6,11 +6,11 @@ from .response import *
 from .errors import RESTAPIError
 
 class RESTClient(object):
-    def __init__(self, base_url='https://ws.dotcloud.com/1.0'):
-        self.base_url = base_url
+    def __init__(self, endpoint='https://ws.dotcloud.com/1.0'):
+        self.endpoint = endpoint
 
     def get(self, path):
-        url = self.base_url + path
+        url = self.endpoint + path
         req = urllib2.Request(url)
         apply_wsse_header(req)
         req.add_header('Accept', 'application/json')
