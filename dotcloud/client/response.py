@@ -1,8 +1,3 @@
-class ErrorResponse(object):
-    def __init__(self, code=None, desc=None):
-        self.code = code
-        self.desc = desc
-
 class BaseResponse(object):
     def __init__(self, obj=None):
         self.obj = obj

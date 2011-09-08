@@ -3,6 +3,7 @@ import json
 
 from .wsse import apply_wsse_header
 from .response import *
+from .errors import RESTAPIError
 
 class RESTClient(object):
     def __init__(self, base_url='https://ws.dotcloud.com/1.0'):
@@ -17,14 +18,14 @@ class RESTClient(object):
             res = urllib2.urlopen(req)
             return self.make_response(res)
         except urllib2.HTTPError, e:
-            return ErrorResponse(code=e.code, desc=e.message)
+            raise RESTAPIError(code=e.code, desc=str(e))
 
     def make_response(self, res):
         if res.headers['Content-Type'] == 'application/json':
             data = json.loads(res.read())
         else:
-            return ErrorResponse(code=500,
-                                 desc='Unsupported Media type: {0}'.format(res.headers['Content-Type']))
+            raise RESTAPIError(code=500,
+                               desc='Unsupported Media type: {0}'.format(res.headers['Content-Type']))
         if res.code >= 400:
-            return ErrorReponse(code=res.code, desc=data['description'])
+            raise RESTAPIError(code=res.code, desc=data['description'])
         return BaseResponse.create(res=res, data=data)
