@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+try:
+   import dotcloud_pkg
+   from dotcloud_pkg.cmdline import CLI
+except ImportError, e:
+   import dotcloud
+   from dotcloud.cmdline import CLI
+
+if __name__ == '__main__':
+   cli = CLI()
+   cli.run()
