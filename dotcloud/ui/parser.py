@@ -1,13 +1,16 @@
 import argparse
+from .version import VERSION
 
 def _init_parser():
     parser = argparse.ArgumentParser(prog='dotcloud', description='dotcloud CLI')
     parser.add_argument('--application', '-A', help='specify the application')
     parser.add_argument('--environment', '-E', help='specify the environment')
+    parser.add_argument('--version', '-v', action='version', version='dotcloud/{0}'.format(VERSION))
     
     subcmd = parser.add_subparsers(dest='cmd')
 
     subcmd.add_parser('list', help='list applications')
+    subcmd.add_parser('version', help='show version')
 
     conn = subcmd.add_parser('connect', help='Connect a local directory with an existing app')
     conn.add_argument('application', help='specify the application')

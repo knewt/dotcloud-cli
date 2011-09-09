@@ -1,4 +1,5 @@
 from .parser import get_parser
+from .version import VERSION
 from ..client import RESTClient
 from ..client.errors import RESTAPIError
 
@@ -17,7 +18,7 @@ else:
     CONFIG_KEY = os.path.join(CONFIG_DIR, 'dotcloud.key')
 
 class CLI(object):
-    __version__ = '2.0.0'
+    __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
         self.client = RESTClient(endpoint=endpoint)
         self.debug = debug
@@ -29,8 +30,8 @@ class CLI(object):
     def run(self):
         p = get_parser()
         args = p.parse_args(args=sys.argv[1:])
-        cmd = 'cmd_{0}'.format(args.cmd)
         self.load_config(args)
+        cmd = 'cmd_{0}'.format(args.cmd)
         if hasattr(self, cmd):
             try:
                 getattr(self, cmd)(args)
@@ -81,6 +82,9 @@ class CLI(object):
 
     def error_authz(self, e):
         self.die("Authorization Error: {0}".format(e.desc))
+
+    def cmd_version(self, args):
+        print 'dotcloud/' + self.__version__
 
     def cmd_list(self, args):
         res = self.client.get('/me/applications')
