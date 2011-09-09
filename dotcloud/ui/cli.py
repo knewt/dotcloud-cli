@@ -71,7 +71,7 @@ class CLI(object):
         sys.exit(1)
 
     def info(self, message):
-        print message
+        print >>sys.stderr, message
 
     def default_error_handler(self, e):
         self.die("Unhandled exception: {0}".format(e))
@@ -142,12 +142,22 @@ class CLI(object):
             ports = service['instances'][0].get('ports', [])
             u = [p for p in ports if p['name'] == 'ssh']
             if len(u) > 0:
-                self.run_ssh(u[0]['url'], '$SHELL')
+                self.run_ssh(u[0]['url'], '$SHELL').wait()
+
+    @app_local
+    def cmd_run(self, args):
+        # TODO refactor with cmd_ssh
+        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
+        res = self.client.get(url)
+        for service in res:
+            ports = service['instances'][0].get('ports', [])
+            u = [p for p in ports if p['name'] == 'ssh']
+            if len(u) > 0:
+                self.run_ssh(u[0]['url'], ' '.join(args.command)).wait()
 
     def run_ssh(self, url, cmd, **kwargs):
         self.info('Connecting to {0}'.format(url))
         res = self.parse_url(url)
-        print res
         options = (
             'ssh', '-t',
             '-i', CONFIG_KEY,
@@ -158,9 +168,10 @@ class CLI(object):
             '-o', 'ServerAliveInterval=10',
             '-l', res.get('user', 'dotcloud'),
             '-p', res.get('port'),
-            res.get('host')
+            res.get('host'),
+            cmd
         )
-        return subprocess.Popen(options, **kwargs).wait()
+        return subprocess.Popen(options, **kwargs)
 
     def parse_url(self, url):
         m = re.match('^(?P<scheme>[^:]+)://((?P<user>[^@]+)@)?(?P<host>[^:/]+)(:(?P<port>\d+))?(?P<path>/.*)?$', url)
