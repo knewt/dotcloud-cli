@@ -110,3 +110,14 @@ class CLI(object):
         show('URLs:')
         for port in instance['ports']:
             show('  {0}: {1}'.format(port['name'], port['url']))
+
+    @app_local
+    def cmd_url(self, args):
+        type = 'http'
+        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+        res = self.client.get(url)
+        for service in res:
+            instance = service['instances'][0]
+            u = [p for p in instance.get('ports', []) if p['name'] == type]
+            if len(u) > 0:
+                print '{0}: {1}'.format(service['name'], u[0]['url'])

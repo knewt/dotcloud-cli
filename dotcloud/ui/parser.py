@@ -13,6 +13,10 @@ def _init_parser():
     conn.add_argument('application', help='specify the application')
 
     info = subcmd.add_parser('info', help='Get information about the application')
+    info.add_argument('service', nargs='?', help='Specify the service')
+
+    url = subcmd.add_parser('url', help='Show URL for the application')
+    url.add_argument('service', nargs='?', help='Specify the service')
 
     return parser
 
