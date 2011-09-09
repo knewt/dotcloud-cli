@@ -76,13 +76,6 @@ class CLI(object):
         for app in sorted(res):
             print app['name']
 
-    @app_local
-    def cmd_info(self, args):
-        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
-        res = self.client.get(url)
-        for service in res:
-            print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
-
     def cmd_connect(self, args):
         url = '/me/applications/{0}'.format(args.application)
         try:
@@ -95,3 +88,25 @@ class CLI(object):
             })
         except RESTAPIError:
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
+
+    @app_local
+    def cmd_info(self, args):
+        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+        res = self.client.get(url)
+        for service in res:
+            print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
+            self.dump_service(service['instances'][0], indent=2)
+
+    def dump_service(self, instance, indent=0):
+        def show(string):
+            buf = ' ' * indent
+            print buf + string
+        show('runtime_config:')
+        for (k, v) in instance['config'].iteritems():
+            show('  {0}: {1}'.format(k, v))
+        show('build_config:')
+        for (k, v) in instance['build_config'].iteritems():
+            show('  {0}: {1}'.format(k, v))
+        show('URLs:')
+        for port in instance['ports']:
+            show('  {0}: {1}'.format(port['name'], port['url']))
