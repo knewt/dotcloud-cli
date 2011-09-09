@@ -4,6 +4,17 @@ from ..client.errors import RESTAPIError
 
 import sys, os
 import json
+import subprocess
+import re
+
+# FIXME
+CONFIG_DIR = os.path.expanduser('~/.dotcloud')
+CONFIG_FILE = os.path.basename(os.environ.get('DOTCLOUD_CONFIG_FILE', 'dotcloud.conf'))
+CONFIG_PATH = os.path.join(CONFIG_DIR, CONFIG_FILE)
+if 'DOTCLOUD_CONFIG_FILE' in os.environ:
+    CONFIG_KEY = CONFIG_PATH + '.key'
+else:
+    CONFIG_KEY = os.path.join(CONFIG_DIR, 'dotcloud.key')
 
 class CLI(object):
     __version__ = '2.0.0'
@@ -121,3 +132,39 @@ class CLI(object):
             u = [p for p in instance.get('ports', []) if p['name'] == type]
             if len(u) > 0:
                 print '{0}: {1}'.format(service['name'], u[0]['url'])
+
+    @app_local
+    def cmd_ssh(self, args):
+        # TODO support www.1
+        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
+        res = self.client.get(url)
+        for service in res:
+            ports = service['instances'][0].get('ports', [])
+            u = [p for p in ports if p['name'] == 'ssh']
+            if len(u) > 0:
+                self.run_ssh(u[0]['url'], '$SHELL')
+
+    def run_ssh(self, url, cmd, **kwargs):
+        self.info('Connecting to {0}'.format(url))
+        res = self.parse_url(url)
+        print res
+        options = (
+            'ssh', '-t',
+            '-i', CONFIG_KEY,
+            '-o', 'LogLevel=QUIET',
+            '-o', 'UserKnownHostsFile=/dev/null',
+            '-o', 'StrictHostKeyChecking=no',
+            '-o', 'PasswordAuthentication=no',
+            '-o', 'ServerAliveInterval=10',
+            '-l', res.get('user', 'dotcloud'),
+            '-p', res.get('port'),
+            res.get('host')
+        )
+        return subprocess.Popen(options, **kwargs).wait()
+
+    def parse_url(self, url):
+        m = re.match('^(?P<scheme>[^:]+)://((?P<user>[^@]+)@)?(?P<host>[^:/]+)(:(?P<port>\d+))?(?P<path>/.*)?$', url)
+        if not m:
+            raise ValueError('"{url}" is not a valid url'.format(url=url))
+        ret = m.groupdict()
+        return ret

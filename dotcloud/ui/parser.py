@@ -18,6 +18,9 @@ def _init_parser():
     url = subcmd.add_parser('url', help='Show URL for the application')
     url.add_argument('service', nargs='?', help='Specify the service')
 
+    url = subcmd.add_parser('ssh', help='SSH into the service')
+    url.add_argument('service', help='Specify the service')
+
     return parser
 
 _p = _init_parser()
