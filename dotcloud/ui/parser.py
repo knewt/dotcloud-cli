@@ -9,6 +9,10 @@ def _init_parser():
 
     subcmd.add_parser('list', help='list applications')
     subcmd.add_parser('info', help='Get information about the application')
+
+    conn = subcmd.add_parser('connect', help='Connect a local directory with an existing app')
+    conn.add_argument('application', help='specify the application')
+
     return parser
 
 _p = _init_parser()
