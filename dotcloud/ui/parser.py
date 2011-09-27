@@ -30,6 +30,8 @@ def _init_parser():
     run.add_argument('service', help='Specify the service')
     run.add_argument('command', nargs='+', help='Run a command on the service')
 
+    env = subcmd.add_parser('env', help='Manipulate application environments')
+
     return parser
 
 _p = _init_parser()
