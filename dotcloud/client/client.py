@@ -1,7 +1,7 @@
 import urllib2
 import json
 
-from .wsse import apply_wsse_header
+from .auth import authenticate
 from .response import *
 from .errors import RESTAPIError
 
@@ -12,7 +12,7 @@ class RESTClient(object):
     def get(self, path):
         url = self.endpoint + path
         req = urllib2.Request(url)
-        apply_wsse_header(req)
+        authenticate(req)
         req.add_header('Accept', 'application/json')
         try:
             res = urllib2.urlopen(req)
