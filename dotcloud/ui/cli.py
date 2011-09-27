@@ -105,6 +105,10 @@ class CLI(object):
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
 
     @app_local
+    def cmd_app(self, args):
+        print args.application
+
+    @app_local
     def cmd_info(self, args):
         url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
         res = self.client.get(url)
