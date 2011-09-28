@@ -16,14 +16,28 @@ class BaseResponse(object):
         return resp
         
 class ListResponse(BaseResponse):
-    def __iter__(self):
-        for obj in self.obj:
-            yield obj
+    @property
+    def items(self):
+        return self.obj
+
+    @property
+    def item(self):
+        return self.obj[0]
         
 class ItemResponse(BaseResponse):
-    def __iter__(self):
-        yield self.obj
+    @property
+    def items(self):
+        return [self.obj]
+
+    @property
+    def item(self):
+        return self.obj
 
 class NoItemResponse(BaseResponse):
-    def __iter__(self):
+    @property
+    def items(self):
+        return None
+
+    @property
+    def item(self):
         return None

@@ -88,7 +88,7 @@ class CLI(object):
 
     def cmd_list(self, args):
         res = self.client.get('/me/applications')
-        for app in sorted(res):
+        for app in sorted(res.items):
             print app['name']
 
     def cmd_connect(self, args):
@@ -116,7 +116,7 @@ class CLI(object):
     def cmd_info(self, args):
         url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
         res = self.client.get(url)
-        for service in res:
+        for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
 
@@ -139,7 +139,7 @@ class CLI(object):
         type = 'http'
         url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
         res = self.client.get(url)
-        for service in res:
+        for service in res.items:
             instance = service['instances'][0]
             u = [p for p in instance.get('ports', []) if p['name'] == type]
             if len(u) > 0:
@@ -150,7 +150,7 @@ class CLI(object):
         # TODO support www.1
         url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
         res = self.client.get(url)
-        for service in res:
+        for service in res.items:
             ports = service['instances'][0].get('ports', [])
             u = [p for p in ports if p['name'] == 'ssh']
             if len(u) > 0:
@@ -161,7 +161,7 @@ class CLI(object):
         # TODO refactor with cmd_ssh
         url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
         res = self.client.get(url)
-        for service in res:
+        for service in res.items:
             ports = service['instances'][0].get('ports', [])
             u = [p for p in ports if p['name'] == 'ssh']
             if len(u) > 0:
