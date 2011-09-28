@@ -56,6 +56,16 @@ class CLI(object):
         f = open(os.path.join(dir, 'config'), 'w+')
         json.dump(config, f)
 
+    def patch_config(self, new_config):
+        config = {}
+        try:
+            io = open('.dotcloud/config')
+            config = json.load(io)
+        except IOError, e:
+            pass
+        config.update(new_config)
+        self.save_config(config)
+
     def load_config(self, args):
         try:
             io = open('.dotcloud/config')
@@ -110,7 +120,33 @@ class CLI(object):
 
     @app_local
     def cmd_env(self, args):
-        print args.environment
+        subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'show'
+        if subcmd == 'show':
+            print args.environment
+        elif subcmd == 'list':
+            url = '/me/applications/{0}/environments'.format(args.application)
+            res = self.client.get(url)
+            for data in res.items:
+                if data['environment'] == args.environment:
+                    print '* ' + data['environment']
+                else :
+                    print '  ' + data['environment']
+        elif subcmd == 'create':
+            name = args.commands.pop(0)
+            url = '/me/applications/{0}/environments'.format(args.application)
+            res = self.client.post(url, { 'name': name })
+            self.info('Environment "{0}" created and set to the current environment.'.format(name))
+            self.patch_config({ 'environment': name })
+        elif subcmd == 'destroy':
+            name = args.commands.pop(0)
+            url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
+            res = self.client.delete(url)
+            self.info('Environment "{0}" destroyed. Current environment is set to default.')
+            self.patch_config({ 'environment': 'default' })
+        elif subcmd == 'use' or subcmd == 'switch':
+            name = args.commands.pop(0)
+            self.info('Current environment switched to {0}'.format(name))
+            self.patch_config({ 'environment': name })
 
     @app_local
     def cmd_info(self, args):

@@ -31,6 +31,7 @@ def _init_parser():
     run.add_argument('command', nargs='+', help='Run a command on the service')
 
     env = subcmd.add_parser('env', help='Manipulate application environments')
+    env.add_argument('commands', nargs='*')
 
     push = subcmd.add_parser('push', help='Push the code')
 

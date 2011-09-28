@@ -20,6 +20,12 @@ class RESTClient(object):
         req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
         return self.request(req)
 
+    def delete(self, path):
+        url = self.endpoint + path
+        req = urllib2.Request(url)
+        req.get_method = lambda: 'DELETE'
+        return self.request(req)
+
     def request(self, req):
         authenticate(req)
         req.add_header('Accept', 'application/json')
