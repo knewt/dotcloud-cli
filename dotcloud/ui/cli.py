@@ -72,7 +72,7 @@ class CLI(object):
         sys.exit(1)
 
     def info(self, message):
-        print >>sys.stderr, message
+        print >>sys.stderr, "--> " + message
 
     def default_error_handler(self, e):
         self.die("Unhandled exception: {0}".format(e))
@@ -146,6 +146,38 @@ class CLI(object):
                 print '{0}: {1}'.format(service['name'], u[0]['url'])
 
     @app_local
+    def cmd_push(self, args):
+        url = '/me/applications/{0}/push-url'.format(args.application)
+        res = self.client.get(url)
+        push_url = res.item.get('url')
+        self.rsync_code(push_url)
+        self.deploy(args.application, args.environment)
+
+    def rsync_code(self, push_url, local_dir='.'):
+        self.info('Syncing code from {0} to {1}'.format(local_dir, push_url))
+        url = self.parse_url(push_url)
+        ssh = ' '.join(self.common_ssh_options)
+        ssh += ' -p {0}'.format(url['port'])
+        if not local_dir.endswith('/'):
+            local_dir += '/'
+        rsync = ('rsync', '-lpthrvz', '--delete', '--safe-links',
+                 '-e', ssh, local_dir,
+                 '{user}@{host}:{dest}/'.format(user=url['user'],
+                                                host=url['host'], dest=url['path']))
+        try:
+            ret = subprocess.call(rsync, close_fds=True)
+            if ret!= 0:
+                self.die('SSH connection failed')
+            return ret
+        except OSError:
+            self.die('rsync failed')
+
+    def deploy(self, application, environment):
+        self.info('Deploying {1} environment for {0}'.format(application, environment))
+        url = '/me/applications/{0}/environments/{1}/deploy'.format(application, environment)
+        self.client.post(url, { 'revision': None })
+
+    @app_local
     def cmd_ssh(self, args):
         # TODO support www.1
         url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
@@ -167,17 +199,22 @@ class CLI(object):
             if len(u) > 0:
                 self.run_ssh(u[0]['url'], ' '.join(args.command)).wait()
 
-    def run_ssh(self, url, cmd, **kwargs):
-        self.info('Connecting to {0}'.format(url))
-        res = self.parse_url(url)
-        options = (
+    @property
+    def common_ssh_options(self):
+        return (
             'ssh', '-t',
             '-i', CONFIG_KEY,
             '-o', 'LogLevel=QUIET',
             '-o', 'UserKnownHostsFile=/dev/null',
             '-o', 'StrictHostKeyChecking=no',
             '-o', 'PasswordAuthentication=no',
-            '-o', 'ServerAliveInterval=10',
+            '-o', 'ServerAliveInterval=10'
+        )
+
+    def run_ssh(self, url, cmd, **kwargs):
+        self.info('Connecting to {0}'.format(url))
+        res = self.parse_url(url)
+        options = self.commond_ssh_options + (
             '-l', res.get('user', 'dotcloud'),
             '-p', res.get('port'),
             res.get('host'),

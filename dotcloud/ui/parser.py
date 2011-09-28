@@ -32,6 +32,8 @@ def _init_parser():
 
     env = subcmd.add_parser('env', help='Manipulate application environments')
 
+    push = subcmd.add_parser('push', help='Push the code')
+
     return parser
 
 _p = _init_parser()
