@@ -210,8 +210,8 @@ class CLI(object):
 
     def deploy(self, application, environment):
         self.info('Deploying {1} environment for {0}'.format(application, environment))
-        url = '/me/applications/{0}/environments/{1}/deploy'.format(application, environment)
-        self.client.post(url, { 'revision': None })
+        url = '/me/applications/{0}/environments/{1}/revision'.format(application, environment)
+        self.client.put(url, {'revision': None})
 
     @app_local
     def cmd_ssh(self, args):

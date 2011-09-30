@@ -20,6 +20,13 @@ class RESTClient(object):
         req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
         return self.request(req)
 
+    def put(self, path, payload={}):
+        url = self.endpoint + path
+        data = json.dumps(payload)
+        req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+        req.get_method = lambda: 'PUT'
+        return self.request(req)
+
     def delete(self, path):
         url = self.endpoint + path
         req = urllib2.Request(url)
