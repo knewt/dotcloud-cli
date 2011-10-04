@@ -127,10 +127,10 @@ class CLI(object):
             url = '/me/applications/{0}/environments'.format(args.application)
             res = self.client.get(url)
             for data in res.items:
-                if data['environment'] == args.environment:
-                    print '* ' + data['environment']
+                if data['name'] == args.environment:
+                    print '* ' + data['name']
                 else :
-                    print '  ' + data['environment']
+                    print '  ' + data['name']
         elif subcmd == 'create':
             name = args.commands.pop(0)
             url = '/me/applications/{0}/environments'.format(args.application)
