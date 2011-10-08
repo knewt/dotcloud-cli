@@ -250,7 +250,7 @@ class CLI(object):
     def run_ssh(self, url, cmd, **kwargs):
         self.info('Connecting to {0}'.format(url))
         res = self.parse_url(url)
-        options = self.commond_ssh_options + (
+        options = self.common_ssh_options + (
             '-l', res.get('user', 'dotcloud'),
             '-p', res.get('port'),
             res.get('host'),
