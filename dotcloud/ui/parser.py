@@ -12,6 +12,9 @@ def _init_parser():
     subcmd.add_parser('list', help='list applications')
     subcmd.add_parser('version', help='show version')
 
+    create = subcmd.add_parser('create', help='Create a new application')
+    create.add_argument('application', help='specify the application')
+
     conn = subcmd.add_parser('connect', help='Connect a local directory with an existing app')
     conn.add_argument('application', help='specify the application')
 

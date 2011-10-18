@@ -81,6 +81,13 @@ class CLI(object):
         print >>sys.stderr, message
         sys.exit(1)
 
+    def confirm(self, prompt, default='n'):
+        choice = ' [Yn]' if default == 'y' else ' [yN]'
+        input = raw_input(prompt + choice + ': ').lower()
+        if input == '':
+            input = default
+        return input == 'y'
+
     def info(self, message):
         print >>sys.stderr, "--> " + message
 
@@ -101,18 +108,35 @@ class CLI(object):
         for app in sorted(res.items):
             print app['name']
 
+    def cmd_create(self, args):
+        self.info('Creating a new application called "{0}"'.format(args.application))
+        url = '/me/applications'
+        try:
+            res = self.client.post(url, { 'name': args.application })
+        except RESTAPIError as e:
+            if e.code == 409:
+                self.die('Application "{0}" already exists.'.format(args.application))
+            else:
+                self.die('Creating app "{0}" failed: {1}'.format(args.application, e))
+        print 'Application "{0}" created.'.format(args.application)
+        if self.confirm('Connect the current directory to "{0}"?'.format(args.application), 'y'):
+            self._connect(args.application)
+
     def cmd_connect(self, args):
         url = '/me/applications/{0}'.format(args.application)
         try:
             res = self.client.get(url)
-            self.info('Connecting with the application "{0}"'.format(args.application))
-            self.save_config({
-                'application': args.application,
-                'environment': 'default',
-                'version': self.__version__
-            })
+            self._connect(args.application)
         except RESTAPIError:
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
+
+    def _connect(self, application):
+        self.info('Connecting with the application "{0}"'.format(application))
+        self.save_config({
+            'application': application,
+            'environment': 'default',
+            'version': self.__version__
+        })
 
     @app_local
     def cmd_app(self, args):
