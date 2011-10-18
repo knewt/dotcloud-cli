@@ -18,6 +18,9 @@ def _init_parser():
     conn = subcmd.add_parser('connect', help='Connect a local directory with an existing app')
     conn.add_argument('application', help='specify the application')
 
+    destroy = subcmd.add_parser('destroy', help='Destroy an existing app')
+    destroy.add_argument('application', help='specify the application')
+
     app = subcmd.add_parser('app', help='Show the application name linked')
 
     info = subcmd.add_parser('info', help='Get information about the application')

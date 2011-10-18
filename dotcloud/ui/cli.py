@@ -130,6 +130,20 @@ class CLI(object):
         except RESTAPIError:
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
 
+    def cmd_destroy(self, args):
+        if not self.confirm('Destroy the application "{0}"?'.format(args.application)):
+            return
+        self.info('Destroying "{0}"'.format(args.application))
+        url = '/me/applications/{0}'.format(args.application)
+        try:
+            res = self.client.delete(url)
+        except RESTAPIError as e:
+            if e.code == 404:
+                self.die('The application "{0}" does not exist.'.format(args.application))
+            else:
+                self.die('Destroying the application "{0}" failed: {1}'.format(args.application, e))
+        self.info('Destroyed.')
+
     def _connect(self, application):
         self.info('Connecting with the application "{0}"'.format(application))
         self.save_config({
@@ -137,6 +151,7 @@ class CLI(object):
             'environment': 'default',
             'version': self.__version__
         })
+        self.info('Connected.')
 
     @app_local
     def cmd_app(self, args):
