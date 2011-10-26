@@ -8,6 +8,6 @@ except ImportError, e:
 
 if __name__ == '__main__':
    import os
-   url = os.environ.get('DOTCLOUD_API_ENDPOINT', 'https://ws.dotcloud.com/1')
+   url = os.environ.get('DOTCLOUD_API_ENDPOINT', 'https://rest.dotcloud.com/1')
    cli = CLI(endpoint=url)
    cli.run()

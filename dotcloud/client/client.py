@@ -6,7 +6,7 @@ from .response import *
 from .errors import RESTAPIError
 
 class RESTClient(object):
-    def __init__(self, endpoint='https://ws.dotcloud.com/1'):
+    def __init__(self, endpoint='https://rest.dotcloud.com/1'):
         self.endpoint = endpoint
 
     def get(self, path):
