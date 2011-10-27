@@ -8,6 +8,7 @@ import json
 import subprocess
 import re
 import time
+import shutil
 
 # FIXME
 CONFIG_DIR = os.path.expanduser('~/.dotcloud')
@@ -75,7 +76,14 @@ class CLI(object):
                 args.application = config['application']
             if not args.environment:
                 args.environment = config['environment']
+            self.config = config
         except IOError, e:
+            self.config = {}
+
+    def destroy_config(self):
+        try:
+            shutil.rmtree('.dotcloud')
+        except:
             pass
 
     def die(self, message):
@@ -131,6 +139,7 @@ class CLI(object):
         except RESTAPIError:
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
 
+    @app_local
     def cmd_destroy(self, args):
         if not self.confirm('Destroy the application "{0}"?'.format(args.application)):
             return
@@ -144,6 +153,8 @@ class CLI(object):
             else:
                 self.die('Destroying the application "{0}" failed: {1}'.format(args.application, e))
         self.info('Destroyed.')
+        if self.config.get('application') == args.application:
+            self.destroy_config()
 
     def _connect(self, application):
         self.info('Connecting with the application "{0}"'.format(application))
