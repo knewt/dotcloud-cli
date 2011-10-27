@@ -14,6 +14,12 @@ class BaseResponse(object):
         resp.res = res
         resp.data = data
         return resp
+
+    def find_link(self, rel):
+        for link in self.data.get('links', []):
+            if link.get('rel') == rel:
+                return link
+        return None
         
 class ListResponse(BaseResponse):
     @property

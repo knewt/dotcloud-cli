@@ -9,26 +9,32 @@ class RESTClient(object):
     def __init__(self, endpoint='https://rest.dotcloud.com/1'):
         self.endpoint = endpoint
 
+    def build_url(self, path):
+        if path.startswith('/'):
+            return self.endpoint + path
+        else:
+            return path
+
     def get(self, path):
-        url = self.endpoint + path
+        url = self.build_url(path)
         req = urllib2.Request(url)
         return self.request(req)
 
     def post(self, path, payload={}):
-        url = self.endpoint + path
+        url = self.build_url(path)
         data = json.dumps(payload)
         req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
         return self.request(req)
 
     def put(self, path, payload={}):
-        url = self.endpoint + path
+        url = self.build_url(path)
         data = json.dumps(payload)
         req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
         req.get_method = lambda: 'PUT'
         return self.request(req)
 
     def delete(self, path):
-        url = self.endpoint + path
+        url = self.build_url(path)
         req = urllib2.Request(url)
         req.get_method = lambda: 'DELETE'
         return self.request(req)

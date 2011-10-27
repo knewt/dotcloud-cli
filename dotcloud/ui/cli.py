@@ -7,6 +7,7 @@ import sys, os
 import json
 import subprocess
 import re
+import time
 
 # FIXME
 CONFIG_DIR = os.path.expanduser('~/.dotcloud')
@@ -251,6 +252,20 @@ class CLI(object):
         self.info('Deploying {1} environment for {0}'.format(application, environment))
         url = '/me/applications/{0}/environments/{1}/revision'.format(application, environment)
         self.client.put(url, {'revision': None})
+        url = '/me/applications/{0}/environments/{1}/build_logs'.format(application, environment)
+        while True:
+            res = self.client.get(url)
+            for item in res.items:
+                line = '{0} [{1}] {2}'.format(
+                    time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(item['timestamp'])),
+                    item['source'],
+                    item['message'])
+                print line
+            next = res.find_link('next')
+            if not next:
+                break
+            url = next.get('href')
+            time.sleep(3)
 
     @app_local
     def cmd_ssh(self, args):
