@@ -140,6 +140,11 @@ class CLI(object):
             self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
 
     @app_local
+    def cmd_disconnect(self, args):
+        self.info('Disconnecting the current directory from "{0}"'.format(args.application))
+        self.destroy_config()
+
+    @app_local
     def cmd_destroy(self, args):
         if not self.confirm('Destroy the application "{0}"?'.format(args.application)):
             return
