@@ -29,9 +29,9 @@ class CLI(object):
             403: self.error_authz,
         }
 
-    def run(self):
+    def run(self, args):
         p = get_parser()
-        args = p.parse_args(args=sys.argv[1:])
+        args = p.parse_args(args)
         self.load_config(args)
         cmd = 'cmd_{0}'.format(args.cmd)
         if hasattr(self, cmd):
