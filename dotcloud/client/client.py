@@ -1,13 +1,16 @@
 import urllib2
 import json
 
-from .auth import authenticate
+from .auth import BasicAuth
 from .response import *
 from .errors import RESTAPIError
 
 class RESTClient(object):
     def __init__(self, endpoint='https://rest.dotcloud.com/1'):
         self.endpoint = endpoint
+
+    def set_basic_auth(self, username, password):
+        self.authenticator = BasicAuth(username, password)
 
     def build_url(self, path):
         if path.startswith('/'):
@@ -40,7 +43,7 @@ class RESTClient(object):
         return self.request(req)
 
     def request(self, req):
-        authenticate(req)
+        self.authenticator.authenticate(req)
         req.add_header('Accept', 'application/json')
         try:
             res = urllib2.urlopen(req)

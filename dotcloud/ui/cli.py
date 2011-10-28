@@ -1,5 +1,6 @@
 from .parser import get_parser
 from .version import VERSION
+from .config import GlobalConfig
 from ..client import RESTClient
 from ..client.errors import RESTAPIError
 
@@ -10,15 +11,6 @@ import re
 import time
 import shutil
 
-# FIXME
-CONFIG_DIR = os.path.expanduser('~/.dotcloud')
-CONFIG_FILE = os.path.basename(os.environ.get('DOTCLOUD_CONFIG_FILE', 'dotcloud.conf'))
-CONFIG_PATH = os.path.join(CONFIG_DIR, CONFIG_FILE)
-if 'DOTCLOUD_CONFIG_FILE' in os.environ:
-    CONFIG_KEY = CONFIG_PATH + '.key'
-else:
-    CONFIG_KEY = os.path.join(CONFIG_DIR, 'dotcloud.key')
-
 class CLI(object):
     __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
@@ -28,6 +20,10 @@ class CLI(object):
             401: self.error_authen,
             403: self.error_authz,
         }
+        self.global_config = GlobalConfig()
+        if self.global_config.get('apikey'):
+            access_key, secret = self.global_config.get('apikey').split(':')
+            self.client.set_basic_auth(access_key, secret)
 
     def run(self, args):
         p = get_parser()
@@ -309,7 +305,7 @@ class CLI(object):
     def common_ssh_options(self):
         return (
             'ssh', '-t',
-            '-i', CONFIG_KEY,
+            '-i', self.global_config.key,
             '-o', 'LogLevel=QUIET',
             '-o', 'UserKnownHostsFile=/dev/null',
             '-o', 'StrictHostKeyChecking=no',
