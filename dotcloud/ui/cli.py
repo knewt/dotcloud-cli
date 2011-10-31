@@ -193,7 +193,7 @@ class CLI(object):
             name = args.commands.pop(0)
             url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
             res = self.client.delete(url)
-            self.info('Environment "{0}" destroyed. Current environment is set to default.')
+            self.info('Environment "{0}" destroyed. Current environment is set to default.'.format(name))
             self.patch_config({ 'environment': 'default' })
         elif subcmd == 'use' or subcmd == 'switch':
             name = args.commands.pop(0)
