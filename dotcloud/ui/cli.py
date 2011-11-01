@@ -36,6 +36,8 @@ class CLI(object):
             except RESTAPIError, e:
                 handler = self.error_handlers.get(e.code, self.default_error_handler)
                 handler(e)
+            except KeyboardInterrupt:
+                pass
 
     def app_local(func):
         def wrapped(self, args):
