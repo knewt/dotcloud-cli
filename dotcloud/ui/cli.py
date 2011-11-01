@@ -228,6 +228,7 @@ class CLI(object):
             self.client.patch(url, patch)
         else:
             self.die('Unknown sub command {0}'.format(subcmd))
+        self.deploy(args.application, args.environment)
 
     @app_local
     def cmd_info(self, args):
