@@ -41,6 +41,9 @@ def _init_parser():
 
     push = subcmd.add_parser('push', help='Push the code')
 
+    var = subcmd.add_parser('var', help='Manipulate application variables')
+    var.add_argument('commands', nargs='*')
+
     return parser
 
 _p = _init_parser()

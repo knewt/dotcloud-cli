@@ -42,6 +42,13 @@ class RESTClient(object):
         req.get_method = lambda: 'DELETE'
         return self.request(req)
 
+    def patch(self, path, payload={}):
+        url = self.build_url(path)
+        data = json.dumps(payload)
+        req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+        req.get_method = lambda: 'PATCH'
+        return self.request(req)
+
     def request(self, req):
         self.authenticator.authenticate(req)
         req.add_header('Accept', 'application/json')

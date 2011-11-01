@@ -201,6 +201,33 @@ class CLI(object):
             name = args.commands.pop(0)
             self.info('Current environment switched to {0}'.format(name))
             self.patch_config({ 'environment': name })
+        else:
+            self.die('Unknown sub command {0}'.format(subcmd))
+
+    @app_local
+    def cmd_var(self, args):
+        subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'list'
+        url = '/me/applications/{0}/environments/{1}/variables'.format(args.application, args.environment)
+        if subcmd == 'list':
+            var = self.client.get(url).item
+            for name in sorted(var.keys()):
+                print '='.join((name, var.get(name)))
+        elif subcmd == 'set':
+            patch = {}
+            for pair in args.commands:
+                try:
+                    key, val = pair.split('=')
+                except ValueError:
+                    self.die('Usage: dotcloud var set KEY=VALUE ...')
+                patch[key] = val
+            self.client.patch(url, patch)
+        elif subcmd == 'unset':
+            patch = {}
+            for name in args.commands:
+                patch[name] = None
+            self.client.patch(url, patch)
+        else:
+            self.die('Unknown sub command {0}'.format(subcmd))
 
     @app_local
     def cmd_info(self, args):
