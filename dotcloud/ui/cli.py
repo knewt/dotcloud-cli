@@ -231,6 +231,23 @@ class CLI(object):
         self.deploy(args.application, args.environment)
 
     @app_local
+    def cmd_scale(self, args):
+        instances = {}
+        for svc in args.services:
+            try:
+                name, value = svc.split('=', 2)
+                value = int(value)
+            except (ValueError, TypeError):
+                self.die('Usage: dotcloud scale service=number')
+            instances[name] = value
+        for name, value in instances.items():
+            url = '/me/applications/{0}/environments/{1}/services/{2}/instances' \
+                .format(args.application, args.environment, name)
+            self.info('Changing instances of {0} to {1}'.format(name, value))
+            self.client.put(url, { 'instances': value })
+        self.deploy(args.application, args.environment)
+
+    @app_local
     def cmd_info(self, args):
         url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
         res = self.client.get(url)

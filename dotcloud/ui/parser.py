@@ -44,6 +44,9 @@ def _init_parser():
     var = subcmd.add_parser('var', help='Manipulate application variables')
     var.add_argument('commands', nargs='*')
 
+    scale = subcmd.add_parser('scale', help='Scale services')
+    scale.add_argument('services', nargs='*')
+
     restart = subcmd.add_parser('restart', help='Restart the service')
     restart.add_argument('service', help='Specify the service')
 
