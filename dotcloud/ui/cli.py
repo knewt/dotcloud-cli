@@ -368,3 +368,14 @@ class CLI(object):
             raise ValueError('"{url}" is not a valid url'.format(url=url))
         ret = m.groupdict()
         return ret
+
+    @app_local
+    def cmd_restart(self, args):
+        url = '/me/applications/{0}/environments/{1}/services/{2}/reboots' \
+            .format(args.application, args.environment, args.service)
+        try:
+            self.client.post(url)
+        except RESTAPIError as e:
+            if e.code == 404:
+                self.die('Service {0} not found'.format(args.service))
+        self.info('Service {0} will be restarted.'.format(args.service))
