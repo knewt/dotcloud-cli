@@ -12,6 +12,8 @@ def _init_parser():
     subcmd.add_parser('list', help='list applications')
     subcmd.add_parser('version', help='show version')
 
+    check = subcmd.add_parser('check', help='Check the installation and authentication')
+
     create = subcmd.add_parser('create', help='Create a new application')
     create.add_argument('application', help='specify the application')
 

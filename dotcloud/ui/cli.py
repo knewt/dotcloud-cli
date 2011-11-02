@@ -110,6 +110,15 @@ class CLI(object):
     def cmd_version(self, args):
         print 'dotcloud/' + self.__version__
 
+    def cmd_check(self, args):
+        # TODO Check ~/.dotcloud stuff
+        try:
+            self.info('Checking the authentication status')
+            res = self.client.get('/me')
+            print 'OK: Client is authenticated as {0}'.format(res.item['username'])
+        except:
+            print 'Authentication failed. Run `dotcloud setup` to redo the authentication'
+
     def cmd_list(self, args):
         res = self.client.get('/me/applications')
         for app in sorted(res.items):
