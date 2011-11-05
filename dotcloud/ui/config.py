@@ -3,14 +3,16 @@ import json
 
 class GlobalConfig(object):
     def __init__(self):
-        self.dir = os.path.expanduser('~/.dotcloud')
-        self.file = os.path.basename(os.environ.get('DOTCLOUD_CONFIG_FILE', 'dotcloud.conf'))
-        self.path = os.path.join(self.dir, self.file)
-        if 'DOTCLOUD_CONFIG_FILE' in os.environ:
-            self.key = self.path + '.key'
-        else:
-            self.key = os.path.join(self.dir, 'dotcloud.key')
+        self.dir = os.path.expanduser('~/.dotcloud2')
+        self.path = self.path_to('config')
+        self.key = self.path_to('dotcloud.key')
         self.load()
+
+    def path_to(self, name):
+        path = os.path.join(self.dir, name)
+        if os.environ.get('SETTINGS_FLAVOR'):
+            path = path + '.' + os.environ.get('SETTINGS_FLAVOR')
+        return path
 
     def load(self):
         try:
@@ -18,6 +20,15 @@ class GlobalConfig(object):
             self.loaded = True
         except IOError:
             self.loaded = False
+
+    def save(self, data):
+        if not os.path.exists(self.dir):
+            os.mkdir(self.dir, 0700)
+        try:
+            f = open(self.path, 'w+')
+            json.dump(data, f)
+        except:
+            raise
 
     def get(self, *args):
         if not self.loaded:

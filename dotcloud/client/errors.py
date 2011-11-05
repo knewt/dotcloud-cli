@@ -5,3 +5,6 @@ class RESTAPIError(Exception):
 
     def __str__(self):
         return self.desc
+
+class AuthenticationNotConfigured(Exception):
+    pass

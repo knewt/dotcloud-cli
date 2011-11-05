@@ -2,7 +2,8 @@ from .parser import get_parser
 from .version import VERSION
 from .config import GlobalConfig
 from ..client import RESTClient
-from ..client.errors import RESTAPIError
+from ..client.errors import RESTAPIError, AuthenticationNotConfigured
+from ..client.auth import NullAuth
 
 import sys, os
 import json
@@ -10,6 +11,10 @@ import subprocess
 import re
 import time
 import shutil
+import getpass
+import urllib2
+import urllib
+import base64
 
 class CLI(object):
     __version__ = VERSION
@@ -19,9 +24,13 @@ class CLI(object):
         self.error_handlers = {
             401: self.error_authen,
             403: self.error_authz,
+            404: self.error_not_found,
         }
         self.global_config = GlobalConfig()
-        if self.global_config.get('apikey'):
+        # TODO check refresh_token
+        if self.global_config.get('access_token'):
+            self.client.set_oauth2_token(self.global_config.get('access_token'))
+        elif self.global_config.get('apikey'):
             access_key, secret = self.global_config.get('apikey').split(':')
             self.client.set_basic_auth(access_key, secret)
 
@@ -33,6 +42,8 @@ class CLI(object):
         if hasattr(self, cmd):
             try:
                 getattr(self, cmd)(args)
+            except AuthenticationNotConfigured:
+                print 'CLI authentication is not configured. Run `dotcloud setup` now.'
             except RESTAPIError, e:
                 handler = self.error_handlers.get(e.code, self.default_error_handler)
                 handler(e)
@@ -88,6 +99,11 @@ class CLI(object):
         print >>sys.stderr, message
         sys.exit(1)
 
+    def prompt(self, prompt, noecho=False):
+        method = getpass.getpass if noecho else raw_input
+        input = method(prompt + ': ')
+        return input
+
     def confirm(self, prompt, default='n'):
         choice = ' [Yn]' if default == 'y' else ' [yN]'
         input = raw_input(prompt + choice + ': ').lower()
@@ -107,6 +123,9 @@ class CLI(object):
     def error_authz(self, e):
         self.die("Authorization Error: {0}".format(e.desc))
 
+    def error_not_found(self, e):
+        self.die("Application or environment does not exist: {0}".format(e.desc))
+
     def cmd_version(self, args):
         print 'dotcloud/' + self.__version__
 
@@ -118,6 +137,46 @@ class CLI(object):
             print 'OK: Client is authenticated as {0}'.format(res.item['username'])
         except:
             print 'Authentication failed. Run `dotcloud setup` to redo the authentication'
+
+    def cmd_setup(self, args):
+        client = RESTClient(endpoint=self.client.endpoint)
+        client.authenticator = NullAuth()
+        urlmap = client.get('/auth/discovery').item
+        username = self.prompt('DotCloud username')
+        password = self.prompt('Password', noecho=True)
+        try:
+            credential = self.register_client(urlmap.get('clients'), username, password)
+        except Exception as e:
+            self.die('Username and password do not match. Try again.')
+        self.info('Registered the CLI client')
+        try:
+            token = self.authorize_client(urlmap.get('token'), credential, username, password)
+        except Exception as e:
+            print res.read()
+        GlobalConfig().save(token)
+        self.info('DotCloud authentication is complete! You are recommended to run `dotcloud check` now.')
+        
+    def register_client(self, url, username, password):
+        req = urllib2.Request(url)
+        req.add_data(urllib.urlencode({ 'username': username, 'password': password }))
+        res = urllib2.urlopen(req)
+        return json.load(res)
+
+    def authorize_client(self, url, credential, username, password):
+        req = urllib2.Request(url)
+        user_pass = '{0}:{1}'.format(urllib2.quote(credential['key']), urllib2.quote(credential['secret']))
+        basic_auth = base64.b64encode(user_pass).strip()
+        req.add_header('Authorization', 'Basic {0}'.format(basic_auth))
+        form = {
+            'username': username,
+            'password': password,
+            'grant_type': 'password',
+            'client_id': credential['key'],
+            'scope': ''  # bug
+        }
+        req.add_data(urllib.urlencode(form))
+        res = urllib2.urlopen(req)
+        return json.load(res)
 
     def cmd_list(self, args):
         res = self.client.get('/me/applications')

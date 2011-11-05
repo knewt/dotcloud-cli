@@ -13,6 +13,7 @@ def _init_parser():
     subcmd.add_parser('version', help='show version')
 
     check = subcmd.add_parser('check', help='Check the installation and authentication')
+    setup = subcmd.add_parser('setup', help='Setup the client authentication')
 
     create = subcmd.add_parser('create', help='Create a new application')
     create.add_argument('application', help='specify the application')

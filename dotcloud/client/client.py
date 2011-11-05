@@ -1,16 +1,20 @@
 import urllib2
 import json
 
-from .auth import BasicAuth
+from .auth import BasicAuth, OAuth2Auth
 from .response import *
-from .errors import RESTAPIError
+from .errors import RESTAPIError, AuthenticationNotConfigured
 
 class RESTClient(object):
     def __init__(self, endpoint='https://rest.dotcloud.com/1'):
         self.endpoint = endpoint
+        self.authenticator = None
 
     def set_basic_auth(self, username, password):
         self.authenticator = BasicAuth(username, password)
+
+    def set_oauth2_token(self, token):
+        self.authenticator = OAuth2Auth(token)
 
     def build_url(self, path):
         if path.startswith('/'):
@@ -50,6 +54,8 @@ class RESTClient(object):
         return self.request(req)
 
     def request(self, req):
+        if not self.authenticator:
+            raise AuthenticationNotConfigured
         self.authenticator.authenticate(req)
         req.add_header('Accept', 'application/json')
         try:
