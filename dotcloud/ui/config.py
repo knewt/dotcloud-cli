@@ -21,12 +21,12 @@ class GlobalConfig(object):
         except IOError:
             self.loaded = False
 
-    def save(self, data):
+    def save(self):
         if not os.path.exists(self.dir):
             os.mkdir(self.dir, 0700)
         try:
             f = open(self.path, 'w+')
-            json.dump(data, f)
+            json.dump(self.data, f)
         except:
             raise
 

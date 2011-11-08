@@ -10,12 +10,6 @@ class RESTClient(object):
         self.endpoint = endpoint
         self.authenticator = None
 
-    def set_basic_auth(self, username, password):
-        self.authenticator = BasicAuth(username, password)
-
-    def set_oauth2_token(self, token):
-        self.authenticator = OAuth2Auth(token)
-
     def build_url(self, path):
         if path.startswith('/'):
             return self.endpoint + path
@@ -62,6 +56,9 @@ class RESTClient(object):
             res = urllib2.urlopen(req)
             return self.make_response(res)
         except urllib2.HTTPError, e:
+            if e.code == 401 and self.authenticator.retriable:
+                if self.authenticator.prepare_retry():
+                    return self.request(req)
             raise RESTAPIError(code=e.code, desc=str(e))
 
     def make_response(self, res):

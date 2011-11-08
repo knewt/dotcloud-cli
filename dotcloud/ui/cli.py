@@ -3,7 +3,7 @@ from .version import VERSION
 from .config import GlobalConfig
 from ..client import RESTClient
 from ..client.errors import RESTAPIError, AuthenticationNotConfigured
-from ..client.auth import NullAuth
+from ..client.auth import BasicAuth, NullAuth, OAuth2Auth
 
 import sys, os
 import json
@@ -27,12 +27,29 @@ class CLI(object):
             404: self.error_not_found,
         }
         self.global_config = GlobalConfig()
-        # TODO check refresh_token
-        if self.global_config.get('access_token'):
-            self.client.set_oauth2_token(self.global_config.get('access_token'))
+        self.setup_auth()
+
+    def setup_auth(self):
+        if self.global_config.get('token'):
+            token = self.global_config.get('token')
+            client = self.global_config.get('client')
+            self.client.authenticator = OAuth2Auth(access_token=token['access_token'],
+                                                   refresh_token=token['refresh_token'],
+                                                   scope=token['scope'],
+                                                   client_id=client['key'],
+                                                   client_secret=client['secret'],
+                                                   token_url=client['token_url'])
+            self.client.authenticator.refresh_callback = lambda res: self.refresh_token(res)
         elif self.global_config.get('apikey'):
             access_key, secret = self.global_config.get('apikey').split(':')
-            self.client.set_basic_auth(access_key, secret)
+            self.client.authenticator = BasicAuth(access_key, secret)
+
+    def refresh_token(self, res):
+        self.info('Refreshed OAuth2 token')
+        self.global_config.data['token']['access_token'] = res['access_token']
+        self.global_config.data['token']['refresh_token'] = res['refresh_token']
+        self.global_config.save()
+        return True
 
     def run(self, args):
         p = get_parser()
@@ -146,6 +163,7 @@ class CLI(object):
         password = self.prompt('Password', noecho=True)
         try:
             credential = self.register_client(urlmap.get('clients'), username, password)
+            credential['token_url'] = urlmap.get('token')
         except Exception as e:
             self.die('Username and password do not match. Try again.')
         self.info('Registered the CLI client')
@@ -153,7 +171,9 @@ class CLI(object):
             token = self.authorize_client(urlmap.get('token'), credential, username, password)
         except Exception as e:
             print res.read()
-        GlobalConfig().save(token)
+        config = GlobalConfig()
+        config.data = {'client': credential, 'token': token}
+        config.save()
         self.info('DotCloud authentication is complete! You are recommended to run `dotcloud check` now.')
         
     def register_client(self, url, username, password):
