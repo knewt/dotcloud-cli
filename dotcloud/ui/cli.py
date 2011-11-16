@@ -170,7 +170,7 @@ class CLI(object):
         try:
             token = self.authorize_client(urlmap.get('token'), credential, username, password)
         except Exception as e:
-            print res.read()
+            self.die('Authorizing CLI error: {0}'.format(e))
         config = GlobalConfig()
         config.data = {'client': credential, 'token': token}
         config.save()
