@@ -35,3 +35,11 @@ class GlobalConfig(object):
             return None
         return self.data.get(*args)
 
+    def save_key(self, key):
+        f = open(self.key, 'w')
+        f.write(key)
+        try:
+            os.fchmod(f.fileno(), 0600)
+        except:
+            pass
+        f.close()

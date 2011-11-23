@@ -153,7 +153,8 @@ class CLI(object):
             res = self.client.get('/me')
             print 'OK: Client is authenticated as {0}'.format(res.item['username'])
         except:
-            print 'Authentication failed. Run `dotcloud setup` to redo the authentication'
+            self.die('Authentication failed. Run `dotcloud setup` to redo the authentication')
+        self.get_keys()
 
     def cmd_setup(self, args):
         client = RESTClient(endpoint=self.client.endpoint)
@@ -174,8 +175,9 @@ class CLI(object):
         config = GlobalConfig()
         config.data = {'client': credential, 'token': token}
         config.save()
+        self.get_keys()
         self.info('DotCloud authentication is complete! You are recommended to run `dotcloud check` now.')
-        
+
     def register_client(self, url, username, password):
         req = urllib2.Request(url)
         req.add_data(urllib.urlencode({ 'username': username, 'password': password }))
@@ -197,6 +199,14 @@ class CLI(object):
         req.add_data(urllib.urlencode(form))
         res = urllib2.urlopen(req)
         return json.load(res)
+
+    def get_keys(self):
+        res = self.client.get('/me/private_keys')
+        try:
+            key = res.items[0]['private_key']
+            self.global_config.save_key(key)
+        except KeyError, IndexError:
+            pass
 
     def cmd_list(self, args):
         res = self.client.get('/me/applications')
