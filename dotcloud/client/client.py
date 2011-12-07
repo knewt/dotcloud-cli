@@ -63,7 +63,7 @@ class RESTClient(object):
             if e.code == 401 and self.authenticator.retriable:
                 if self.authenticator.prepare_retry():
                     return self.request(req)
-            raise RESTAPIError(code=e.code, desc=str(e))
+            return self.make_response(e)
 
     def make_response(self, res):
         if res.headers['Content-Type'] == 'application/json':
@@ -74,5 +74,5 @@ class RESTClient(object):
             raise RESTAPIError(code=500,
                                desc='Unsupported Media type: {0}'.format(res.headers['Content-Type']))
         if res.code >= 400:
-            raise RESTAPIError(code=res.code, desc=data['description'])
+            raise RESTAPIError(code=res.code, desc=data['error']['description'])
         return BaseResponse.create(res=res, data=data)
