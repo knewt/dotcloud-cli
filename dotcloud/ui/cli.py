@@ -306,6 +306,7 @@ class CLI(object):
     def cmd_var(self, args):
         subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'list'
         url = '/me/applications/{0}/environments/{1}/variables'.format(args.application, args.environment)
+        deploy = None
         if subcmd == 'list':
             var = self.client.get(url).item
             for name in sorted(var.keys()):
@@ -319,14 +320,17 @@ class CLI(object):
                     self.die('Usage: dotcloud var set KEY=VALUE ...')
                 patch[key] = val
             self.client.patch(url, patch)
+            deploy = True
         elif subcmd == 'unset':
             patch = {}
             for name in args.commands:
                 patch[name] = None
             self.client.patch(url, patch)
+            deploy = True
         else:
             self.die('Unknown sub command {0}'.format(subcmd))
-        self.deploy(args.application, args.environment)
+        if deploy:
+            self.deploy(args.application, args.environment)
 
     @app_local
     def cmd_scale(self, args):
