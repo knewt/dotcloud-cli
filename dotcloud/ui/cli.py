@@ -476,6 +476,11 @@ class CLI(object):
             '-o', 'ServerAliveInterval=10'
         )
 
+    def _escape(self, s):
+        for c in ('`', '$', '"'):
+            s = s.replace(c, '\\' + c)
+        return s
+
     def run_ssh(self, url, cmd, **kwargs):
         self.info('Connecting to {0}'.format(url))
         res = self.parse_url(url)
@@ -483,7 +488,7 @@ class CLI(object):
             '-l', res.get('user', 'dotcloud'),
             '-p', res.get('port'),
             res.get('host'),
-            cmd
+            'bash -l -c "{0}"'.format(self._escape(cmd))
         )
         return subprocess.Popen(options, **kwargs)
 
