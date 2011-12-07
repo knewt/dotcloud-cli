@@ -428,7 +428,7 @@ class CLI(object):
             for item in res.items:
                 line = '{0} [{1}] {2}'.format(
                     time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(item['timestamp'])),
-                    item['source'],
+                    item.get('source', 'api'),
                     item['message'])
                 print line
             next = res.find_link('next')
