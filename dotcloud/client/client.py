@@ -57,7 +57,7 @@ class RESTClient(object):
             req.add_header('X-DotCloud-TraceID', self.trace_id)
         try:
             res = urllib2.urlopen(req)
-            self.trace_id = res.headers['X-DotCloud-TraceID']
+            self.trace_id = res.headers.get('X-DotCloud-TraceID')
             return self.make_response(res)
         except urllib2.HTTPError, e:
             if e.code == 401 and self.authenticator.retriable:
