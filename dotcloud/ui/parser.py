@@ -6,6 +6,7 @@ def _init_parser():
     parser.add_argument('--application', '-A', help='specify the application')
     parser.add_argument('--environment', '-E', help='specify the environment')
     parser.add_argument('--version', '-v', action='version', version='dotcloud/{0}'.format(VERSION))
+    parser.add_argument('--trace', action='store_true', help='Display trace ID')
     
     subcmd = parser.add_subparsers(dest='cmd')
 

@@ -9,6 +9,7 @@ class RESTClient(object):
     def __init__(self, endpoint='https://rest.dotcloud.com/1'):
         self.endpoint = endpoint
         self.authenticator = None
+        self.trace_id = None
 
     def build_url(self, path):
         if path.startswith('/'):
@@ -52,8 +53,11 @@ class RESTClient(object):
             raise AuthenticationNotConfigured
         self.authenticator.authenticate(req)
         req.add_header('Accept', 'application/json')
+        if self.trace_id:
+            req.add_header('X-DotCloud-TraceID', self.trace_id)
         try:
             res = urllib2.urlopen(req)
+            self.trace_id = res.headers['X-DotCloud-TraceID']
             return self.make_response(res)
         except urllib2.HTTPError, e:
             if e.code == 401 and self.authenticator.retriable:

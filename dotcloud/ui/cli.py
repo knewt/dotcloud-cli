@@ -66,6 +66,9 @@ class CLI(object):
                 handler(e)
             except KeyboardInterrupt:
                 pass
+            finally:
+                if args.trace and self.client.trace_id:
+                    print '===> TraceID: ' + self.client.trace_id
 
     def app_local(func):
         def wrapped(self, args):
