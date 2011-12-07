@@ -178,6 +178,8 @@ class CLI(object):
         config = GlobalConfig()
         config.data = {'client': credential, 'token': token}
         config.save()
+        self.global_config = GlobalConfig()  # reload
+        self.setup_auth()
         self.get_keys()
         self.info('DotCloud authentication is complete! You are recommended to run `dotcloud check` now.')
 
