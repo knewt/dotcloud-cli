@@ -23,6 +23,8 @@ def _init_parser():
     conn.add_argument('application', help='specify the application')
 
     destroy = subcmd.add_parser('destroy', help='Destroy an existing app')
+    destroy.add_argument('service', nargs='?', help='Specify the service')
+
     disconnect = subcmd.add_parser('disconnect', help='Disconnect the current directory from DotCloud app')
 
     app = subcmd.add_parser('app', help='Show the application name linked to the current directory')

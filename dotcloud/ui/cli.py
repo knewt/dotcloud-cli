@@ -253,20 +253,29 @@ class CLI(object):
 
     @app_local
     def cmd_destroy(self, args):
-        if not self.confirm('Destroy the application "{0}"?'.format(args.application)):
+        if args.service is None:
+            what_destroy = 'application'
+            to_destroy = args.application
+            url = '/me/applications/{0}'.format(args.application)
+        else:
+            what_destroy = 'service'
+            to_destroy = '{0}.{1}'.format(args.application, args.service)
+            url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
+
+        if not self.confirm('Destroy the {0} "{1}"?'.format(what_destroy, to_destroy)):
             return
-        self.info('Destroying "{0}"'.format(args.application))
-        url = '/me/applications/{0}'.format(args.application)
+        self.info('Destroying "{0}"'.format(to_destroy))
         try:
             res = self.client.delete(url)
         except RESTAPIError as e:
             if e.code == 404:
-                self.die('The application "{0}" does not exist.'.format(args.application))
+                self.die('The {0} "{1}" does not exist.'.format(what_destroy, to_destroy))
             else:
-                self.die('Destroying the application "{0}" failed: {1}'.format(args.application, e))
+                self.die('Destroying the {0} "{1}" failed: {1}'.format(what_destroy, to_destroy, e))
         self.info('Destroyed.')
-        if self.config.get('application') == args.application:
-            self.destroy_config()
+        if args.service is None:
+            if self.config.get('application') == args.application:
+                self.destroy_config()
 
     def _connect(self, application):
         self.info('Connecting with the application "{0}"'.format(application))
