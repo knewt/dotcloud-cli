@@ -437,9 +437,14 @@ class CLI(object):
         while True:
             res = self.client.get(url)
             for item in res.items:
-                line = u'{0} [{1}] {2}'.format(
-                    time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(item['timestamp'])),
-                    item.get('source', 'api'),
+                source = item.get('source', 'api')
+                if source == 'api':
+                    source = '-->'
+                else:
+                    source = '[{0}]'.format(source)
+                line = u'{0} {1} {2}'.format(
+                    time.strftime('%H:%M:%S', time.gmtime(item['timestamp'])),
+                    source,
                     item['message'])
                 print line
             next = res.find_link('next')
