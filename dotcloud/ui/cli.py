@@ -144,7 +144,7 @@ class CLI(object):
         self.die("Authorization Error: {0}".format(e.desc))
 
     def error_not_found(self, e):
-        self.die("Application or environment does not exist: {0}".format(e.desc))
+        self.die("Not Found: {0}".format(e.desc))
 
     def cmd_version(self, args):
         print 'dotcloud/' + self.__version__
