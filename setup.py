@@ -8,6 +8,7 @@ setup(
     author = 'dotCloud Inc.',
     version = VERSION,
     packages = [
+        'dotcloud',
         'dotcloud.ui',
         'dotcloud.client'
     ],
