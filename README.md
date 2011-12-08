@@ -1,8 +1,8 @@
-= DotCloud CLI
+# DotCloud CLI
 
 This is a beta version of the new DotCloud command line interface.
 
-== What's New
+## What's New
 
 This version of CLI is designed to work with the application directory
 linked to the remote dotcloud application.
@@ -24,7 +24,7 @@ applications by repeating the command line history.
 The command line executable is installed as `dotcloud2` so that you
 can keep using the existing version of the dotcloud command.
 
-== Setup
+## Setup
 
 First, you have to configure your CLI to work as a DotCloud REST API
 consumer.
@@ -49,13 +49,13 @@ correctly.
 If this fails, try removing the directory `~/.dotcloud2` and start
 over from the setup.
 
-== Working with your application
+## Working with your application
 
     > cd ~/dev
     > mkdir myapp
     > (write some code)
 
-=== Create
+### Create
 
 Once you've done writing your awesome application, run the `create` command:
 
@@ -70,7 +70,7 @@ As you see, the CLI asks you if you want to connect the current
 working directory to the remote application. This allows you to omit
 typing the application name from now on.
 
-=== Running commands
+### Running commands
 
 To push the code to the DotCloud platform, simply type:
 
@@ -94,7 +94,7 @@ short) option:
 You can also use this option when you want to run commands against the
 application that you don't have the working directory for.
 
-=== Connect
+### Connect
 
 Similarly, if you already have a working directory *and* a dotcloud
 remote application and want to connect them together, instead of
