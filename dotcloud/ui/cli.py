@@ -25,6 +25,7 @@ class CLI(object):
             401: self.error_authen,
             403: self.error_authz,
             404: self.error_not_found,
+            500: self.error_server,
         }
         self.global_config = GlobalConfig()
         self.setup_auth()
@@ -68,7 +69,7 @@ class CLI(object):
                 pass
             finally:
                 if args.trace and self.client.trace_id:
-                    print '===> TraceID: ' + self.client.trace_id
+                    print '---> TraceID: ' + self.client.trace_id
 
     def app_local(func):
         def wrapped(self, args):
@@ -145,6 +146,11 @@ class CLI(object):
 
     def error_not_found(self, e):
         self.die("Not Found: {0}".format(e.desc))
+
+    def error_server(self, e):
+        if self.client.trace_id:
+            print '---> TraceID: {0}'.format(self.client.trace_id)
+        self.die('Server Error: {0}'.format(e.desc))
 
     def cmd_version(self, args):
         print 'dotcloud/' + self.__version__
