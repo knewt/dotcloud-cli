@@ -437,7 +437,7 @@ class CLI(object):
         while True:
             res = self.client.get(url)
             for item in res.items:
-                line = '{0} [{1}] {2}'.format(
+                line = u'{0} [{1}] {2}'.format(
                     time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(item['timestamp'])),
                     item.get('source', 'api'),
                     item['message'])
