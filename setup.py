@@ -3,11 +3,15 @@
 from setuptools import setup
 
 setup(
-    name = 'dotcloud.cli2',
+    name = 'dotcloud2',
     author = 'dotCloud Inc.',
     packages = [
-        'dotcloud',
-        'dotcloud.cli2'
+        'dotcloud.ui',
+        'dotcloud.client'
     ],
+    scripts  = [
+        'bin/dotcloud2'
+    ],
+    install_requires = ['argparse'],
     zip_safe = False
 )
